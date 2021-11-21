@@ -4,7 +4,7 @@ import soundfile as sf
 from playsound import playsound
 import winsound
 
-# winsound.PlaySound('audio/Project3_v2.wav', winsound.SND_ASYNC) ## windows specific code
+winsound.PlaySound('audio/Project3_v2.wav', winsound.SND_ASYNC) ## windows specific code
 
 data1, sampleRate1 = sf.read('audio/Project3_v2.wav')
 
@@ -56,14 +56,14 @@ fSignals = []
 
 
 for i in range(0, signalCount):
-    fSignals.append((np.fft.fft(data1[signalPoints[i]:signalPoints[i]+sampleRate1])))
+    fSignals.append((np.fft.fft(cleanSignal[signalPoints[i]:signalPoints[i]+sampleRate1])))
     plt.figure(i+3)
     plt.title("signal " + str(i+1))
     plt.plot([abs(ele) for ele in fSignals[i]])
     print('--------------------------')
     print('signal' + str(i+1))
     for j in range(1, int(len(fSignals[i]) / 2)):
-        if fSignals[i][j] > fSignals[i][j - 1] and fSignals[i][j] > fSignals[i][j + 1] and fSignals[i][j] > 100:
+        if abs(fSignals[i][j]) > abs(fSignals[i][j - 1]) and abs(fSignals[i][j]) > abs(fSignals[i][j + 1]) and abs(fSignals[i][j]) > 100:
             print(j)
 
 plt.show()

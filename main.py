@@ -2,77 +2,68 @@ import matplotlib.pyplot as plt
 import numpy as np
 import soundfile as sf
 from playsound import playsound
+import winsound
 
-# spf = wave.open("audio/Project3_v2.wav", "r")
-# for i in range(0,9):
-#     data, samplerate = sf.read('audio/Dtmf'+str(i)+'.ogg')
-#     print(data)
-#     result = np.fft.fft(data)
-#     plt.figure(i)
-#     plt.title("Signal"+ str(i))
-#     plt.plot(result)
-#
-# plt.show()
-
-#
-# data, samplerate = sf.read('audio/Dtmf1.ogg')
-# print(data)
-# result = np.fft.fft(data)
-# res = [abs(ele) for ele in result]
-# plt.figure(1)
-# plt.title("Signal" + str(1))
-# plt.plot(res)
-# playsound('audio/Project3_v2.wav')
+winsound.PlaySound('audio/Project3_v2.wav', winsound.SND_ASYNC) ## windows specific code
 
 data1, sampleRate1 = sf.read('audio/Project3_v2.wav')
-plt.figure(1)
 
+plt.figure(1)
 plt.title("Signal project 1")
-plt.plot(data1)
+plt.plot([abs(ele) for ele in data1])
+
+
+
+
+result = np.fft.fft(data1)
+plt.figure(2)
+plt.title("Signal F transform")
+
+
+for i in range(0, len(result)-10):
+    if abs(result[i])<200 and not(abs(result[i-10])>300 or abs(result[i+10])>300):
+        result[i]=0
+
+plt.plot([abs(ele) for ele in result])
+
+
+cleanSignal = np.fft.ifft(result)
 
 data2 = []
+signalPoints = []
+signalCount = 0
 
-for element in range(44000, len(data1) - 1):
-    if data1[element - 22000]>0.05 and data1[element] > 0.05 and data1[element+1] < 0.05:
-        data2 = data1[element - 44000: element]
-        print(element)
-print('===========================')
-plt.figure(2)
-plt.title('data 2')
-plt.plot(data2)
-print(len(data2))
+el = 0
+while el <len(data1)-20000:
+    el+=100
+    j = 0
+    sum = 0
+    while(j<sampleRate1):
+        j+=1
+        sum += abs(cleanSignal[el])
+    if (sum/sampleRate1>0.04):
+        # print('element found')
+        # print(el)
+        signalPoints.append(el)
+        el+=sampleRate1
+        signalCount+=1
 
-result = np.fft.fft(data2)
-plt.figure(3)
-plt.title("Signal F transform")
-# plt.plot(result)
-print(len(data1))
-# print(sampleRate1)
-# for e in range(0, len(result)):
-#     if not (697/sampleRate1*len(data1) < e < 1477/sampleRate1*len(data1) or \
-#             -697/sampleRate1*len(data1) + len(data1) > e > -1477/sampleRate1*len(data1)+len(data1)):
-#         result[e] = 0
-plt.plot([abs(ele) for ele in result])
-#
-# cleanSignal = np.fft.ifft(result)
-# plt.figure(3)
-# plt.title("Clean signal")
-# plt.plot(cleanSignal)
+print(signalPoints)
+print(signalCount)
+
+signals = []
+fSignals = []
 
 
-# sf.write("audio/test.wav", np.asarray(cleanSignal, dtype=np.float64), sampleRate1)
-print('-------------------------')
-# playsound('audio/test.wav')
-
+for i in range(0, signalCount):
+    fSignals.append((np.fft.fft(cleanSignal[signalPoints[i]:signalPoints[i]+sampleRate1])))
+    plt.figure(i+3)
+    plt.title("signal " + str(i+1))
+    plt.plot([abs(ele) for ele in fSignals[i]])
+    print('--------------------------')
+    print('signal' + str(i+1))
+    for j in range(1, int(len(fSignals[i]) / 2)):
+        if abs(fSignals[i][j]) > abs(fSignals[i][j - 1]) and abs(fSignals[i][j]) > abs(fSignals[i][j + 1]) and abs(fSignals[i][j]) > 100:
+            print(j)
 
 plt.show()
-
-#
-# for i in range(1, int((len(res) - 1) / 2)):
-#     if res[i] > res[i - 1] and res[i] > res[i + 1] and res[i] > 100:
-#         print('--------------------------------------')
-#         print(res[i])
-#         print(res[i + 1])
-#         print(res[i - 1])
-#         print(i)
-#         print('--------------------------------------')
